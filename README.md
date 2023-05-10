@@ -15,7 +15,7 @@ contains:
  - trello style subject tracker
  - end of the day counter
  
- 
+ also the guide.py is the main file
  
  ## CAUTION
  the exercise planner creates a template and you have to edit it.

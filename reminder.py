@@ -106,17 +106,6 @@ def show_reminders():
         reminders = date_groups[date]
         for reminder in reminders:
             print(f"{reminder[0]}. {reminder[1]}")
-
-"""
-    The date_groups dictionary now uses date objects as keys instead of date strings.
-
-    After the date_groups dictionary is populated, the keys are sorted in ascending order using the sorted() function.
-
-    When iterating over the sorted dates, the date object is formatted as a string using strftime() to get the original date string.
-
-    The reminders for each date group are now stored in the reminders variable, which is sorted by index before being printed.
-"""
-
         
 
 def modify_reminder():

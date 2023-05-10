@@ -1,4 +1,4 @@
-personal planner for studying.
+# personal planner for studying.
 
 
 contains:

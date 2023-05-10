@@ -1,4 +1,4 @@
-# personal planner for studying.
+## personal planner for studying.
 
 
 contains:
@@ -17,7 +17,7 @@ contains:
  
  
  
- # CAUTION
+ ## CAUTION
  the exercise planner creates a template and you have to edit it.
  also the days are hardcoded i think, i don't remember (may improve this) 
  also the hour of the week (facepalm)

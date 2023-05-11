@@ -13,11 +13,12 @@ import subjects
 import videolecture
 import studytask
 from clearterminal import clear_terminal
+import daycalculator
 
 
 def main():
+    clear_terminal()
     while True:
-        clear_terminal()
         print("{:+^80}\n".format(""))
         print("{:^80}".format("STUDY GUIDE"))
         print("{:+^80}\n".format(""))
@@ -29,10 +30,10 @@ def main():
         print("|{:<39}|{:<39}|".format(" m. german    - german flashcards", " g. gym       - exercise plan"))
         print("+{:-^78}+\n".format(""))
         print("|{:<39}|{:<39}|".format(" c. track     - study tracker", " u. subjects  - subject list"))
-        print("|{:<39}|{:<39}|".format(" q. quit      ", ""))
+        print("|{:<39}|{:<39}|".format(" q. quit      ", " j. date      - change semester date"))
         print("{:+^80}\n".format(""))
-        print("{:<50}{:>30}".format(f"{daycalculator.days} days left", f"hours in a week is {daycalculator.sum_values}\n"))
-        print("{:<50}{:>30}".format(f"Today is {daycalculator.weektoday}, estimated work is {daycalculator.todayhours} hour and {round(books.pages_per_today)} pages.", f"\ntime left till end of the day: {daycalculator.hours} hours, {daycalculator.minutes} minutes.\n"))
+        print("{:<50}{:>30}".format(f"{daycalculator.days} days left", f"Today is {daycalculator.weektoday}\n "))
+        print("{:<50}{:>30}".format(f"hours in a week is {daycalculator.sum_values}, estimated work is {daycalculator.todayhours} hour and {round(books.pages_per_today)} pages.", f"\ntime left till end of the day: {daycalculator.hours} hours, {daycalculator.minutes} minutes.\n"))
         print("{:<50}{:>30}".format(f"pages per hour is at {'{0:.2f}'.format(books.pages_per_hour)}", ""))
         select = input("\n\nwhat you wanna do? :   ")
 
@@ -55,7 +56,8 @@ def main():
             tracker.main()
         elif select == "v":
             clear_terminal()
-            videolecture.main()    
+            videolecture.main()
+            clear_terminal()  
         elif select == "r":
             clear_terminal()
             reminder.main()
@@ -71,6 +73,11 @@ def main():
         elif select == "g":
             clear_terminal()
             gym.main()
+        elif select == "j":
+            clear_terminal()
+            daycalculator.save_date_to_json()
+            clear_terminal()
+            print("!day changed, please reload the program\n")
         elif select == "n":
             clear_terminal()
             notes.main()

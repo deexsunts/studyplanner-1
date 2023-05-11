@@ -1,4 +1,4 @@
-## personal planner for studying.
+personal planner for studying.
 
 
 contains:
@@ -15,9 +15,9 @@ contains:
  - trello style subject tracker
  - end of the day counter
  
- also the guide.py is the main file
  
- ## CAUTION
+ 
+ # CAUTION
  the exercise planner creates a template and you have to edit it.
  also the days are hardcoded i think, i don't remember (may improve this) 
  also the hour of the week (facepalm)

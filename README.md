@@ -18,7 +18,7 @@ contains:
  
  
  # CAUTION
- the exercise planner creates a template and you have to edit it.
- also the days are hardcoded i think, i don't remember (may improve this) 
- also the hour of the week (facepalm)
- to tired to change them for now.
+ the exercise planner creates a template and you have to edit 
+ also the hour of the week (its kinda useless)
+ and the today's hours (again, useless and can be commented out)
+ they both exist in the daycalculator.py

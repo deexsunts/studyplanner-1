@@ -22,6 +22,7 @@ contains:
  also the hour of the week (useless)
 
  
- # Quick Changelog
+ #quick changelog
  changed the planner so it would automatically save stuff down
- overall 3 updates
+ changed the books and the notes section
+ added progress to the video section

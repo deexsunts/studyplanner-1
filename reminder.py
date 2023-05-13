@@ -59,6 +59,7 @@ def remove_reminder():
     index = int(index)
     reminders = [reminder for reminder in reminders if reminder['index'] != index]
     save_reminders(reminders)
+    clear_terminal()
     print("Reminder removed successfully!")
 
 def flush_reminders():
@@ -116,8 +117,18 @@ def show_reminders():
 
     The reminders for each date group are now stored in the reminders variable, which is sorted by index before being printed.
 """
-
-        
+def list_reminders():
+    clear_terminal()
+    reminders = load_reminders()
+    if len(reminders) == 0:
+        print("\n\nreminders empty.")
+    else:
+        print(f"\n\n{'Index':<10}{'Study Name':<30}{'Date':<15}")
+        for reminder in reminders:
+            print(f"{reminder['index']:<10}{reminder['study_name']:<30}{reminder['current_date']:<15}")
+    input("\nPress any key to continue....")
+    clear_terminal()
+ 
 
 def modify_reminder():
     update_reminder_index()
@@ -144,6 +155,7 @@ def main():
         print("r. Remove reminder")
         print("f. Flush reminders")
         print("s. Show reminders")
+        print("d. list reminders")
         print("v. Save reminders to file")
         print("l. Load reminders from file")
         print("q. Quit")
@@ -157,6 +169,9 @@ def main():
         elif choice == 'f':
             clear_terminal()
             flush_reminders()
+        elif choice == 'd':
+            clear_terminal()
+            list_reminders()
         elif choice == 's':
             clear_terminal()
             show_reminders()

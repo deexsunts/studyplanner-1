@@ -115,28 +115,32 @@ def save_pdf_notes(directory):
 
 # Show notes divided into a time interval t
 def show_notes_by_time_interval():
-    t = int(daycalculator.days)-4
+    t = int(daycalculator.days)
     total_pages_read = sum([note.get("pages_read", 0) for note in notes])
     total_pages_left = sum([note["pages"] - note.get("pages_read", 0) for note in notes])
     pages_per_week = total_pages_left / (t/7)
     pages_per_day = total_pages_left / t
     pages_per_hour = total_pages_left / (t*int(daycalculator.sum_values)/7)
     pages_per_today = pages_per_hour * daycalculator.todayhours
-    print(f"\n\nTime interval: {t} days")
+
+    print(f"\n\n{'='*30}\n{' '*2}NOTES BY TIME INTERVAL\n{'='*30}\n")
+    print(f"Time interval: {t} days")
     print(f"Total pages: {sum([note['pages'] for note in notes])}")
     print(f"Total pages read: {total_pages_read}")
     print(f"Total pages left: {total_pages_left}")
     print(f"Pages per week: {pages_per_week:.2f}")
     print(f"Pages per day: {pages_per_day:.2f}")
     print(f"Pages per hour: {pages_per_hour:.2f}")
-    print(f"Pages per today: {pages_per_today:.2f}")
-    print("\n\nnotes by time interval:")
+    print(f"Pages per today: {pages_per_today:.2f}\n\n")
+
+    print(f"{'Name':<30} {'Pages read':<15} {'Pages left':<15} {'Pages per week':<20} {'Pages per day':<20}")
+    print("-"*100)
     for note in notes:
         pages_read = note.get("pages_read", 0)
         pages_left = note["pages"] - pages_read
         pages_per_week = pages_left / (t/7)
         pages_per_day = pages_left / t
-        print(f"{note['name']} - Pages read: {pages_read} - Pages left: {pages_left} - Pages per week: {pages_per_week:.2f} - Pages per day: {pages_per_day:.2f}")
+        print(f"{note['name']:<30} {pages_read:<15} {pages_left:<15} {pages_per_week:<20.2f} {pages_per_day:<20.2f}")
     input("\n\npress any key to continue......")
     clear_terminal()
 

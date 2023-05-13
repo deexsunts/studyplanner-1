@@ -20,20 +20,19 @@ def init():
 def daily_workload(lectures):
     clear_terminal()
     today = datetime.now().date()
-    print("\nVideo\t\tTime left\tDays left\tDaily workload")
-    print("-------------------------------------------------------------")
+    print("\n\nVideo\t\tTime left\tDays left\tDaily workload\tWatched (%)")
+    print("---------------------------------------------------------------------------")
     for lecture in lectures:
         time_left = lecture["duration"] - lecture["amount_watched"]
         time_left_str = f"{time_left//60:02d}:{time_left%60:02d}"
         days_left = (lecture["deadline"] - today).days
         if days_left < 1:
-            print(f"{lecture['name']}\t\t{time_left_str}\t\t- \t\tOverdue!")
+            print(f"{lecture['name']}\t\t{time_left_str}\t\t- \t\tOverdue!\t{int(lecture['amount_watched'] / lecture['duration'] * 100)}%")
         else:
             daily_workload = int(time_left / days_left)
             daily_workload_str = f"{daily_workload//60:02d}:{daily_workload%60:02d}"
-            print(f"{lecture['name']}\t{time_left_str}\t\t{days_left}\t\t{daily_workload_str}")
-    input("\n\n press any key to continue.....")
-    clear_terminal()
+            print(f"{lecture['name']}\t{time_left_str}\t\t{days_left}\t\t{daily_workload_str}\t\t{int(lecture['amount_watched'] / lecture['duration'] * 100)}%")
+
 
 def save(lectures):
     clear_terminal()
@@ -72,15 +71,12 @@ def add_lecture(lectures):
 
 def show_lectures(lectures):
     clear_terminal()
-    print("\nIndex\tName\tTime left\tDeadline")
-    print("-------------------------------------------\n")
+    print("\n\nIndex\tName\t\tTime left\tDeadline")
     for i, lecture in enumerate(lectures):
         time_left = lecture["duration"] - lecture["amount_watched"]
         time_left_str = f"{time_left//60:02d}:{time_left%60:02d}"  # format the time_left as HH:MM
         deadline = lecture["deadline"].strftime("%d-%m-%Y")
         print(f"{i+1}\t{lecture['name']}\t{time_left_str}\t\t{deadline}")
-    input("\n\n press any key to continue.....")
-    clear_terminal()
 
 def update_index(lectures):
     for i, lecture in enumerate(lectures):
@@ -129,6 +125,23 @@ def flush_database(lectures):
     else:
         print("Database flush cancelled.")
 
+def change_deadline(lectures):
+    show_lectures(lectures)
+    print()
+    index = int(input("Enter the index of the lecture to change the deadline: "))
+    if index < 1 or index > len(lectures):
+        print("Invalid lecture index")
+        return
+    
+    days = int(input("Enter the number of days to add or subtract from the deadline: "))
+    lecture = lectures[index-1]
+    current_deadline = lecture["deadline"]
+    new_deadline = current_deadline + timedelta(days=days)
+    lecture["deadline"] = new_deadline
+    save(lectures)
+    print(f"Deadline for {lecture['name']} changed from {current_deadline} to {new_deadline}")
+
+
 
 def main():
     clear_terminal()
@@ -141,6 +154,7 @@ def main():
         print("s. Show lectures")
         print("d. Daily workload")
         print("m. Modify lecture")
+        print("c. change dead-line")
         print("r. Remove a lecture")
         print("n. lecture notes")
         print("f. Flush database")
@@ -155,14 +169,20 @@ def main():
             save(lectures)
         elif choice == "s":
             show_lectures(lectures)
+            input("\n\n press any key to continue.....")
+            clear_terminal()
         elif choice == "m":
             modify_lecture(lectures)
         elif choice == "r":
             remove_lecture(lectures)
         elif choice == "d":
             daily_workload(lectures)
+            input("\n\n press any key to continue.....")
+            clear_terminal()
         elif choice == "f":
             flush_database(lectures)
+        elif choice == "c":
+            change_deadline(lectures)
         elif choice == "n":
             edit_notes()
             clear_terminal()

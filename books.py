@@ -129,23 +129,28 @@ def show_books_by_time_interval():
     pages_per_day = total_pages_left / t
     pages_per_hour = total_pages_left / (t*int(daycalculator.sum_values)/7)
     pages_per_today = pages_per_hour * daycalculator.todayhours
-    print(f"\n\nTime interval: {t} days")
+
+    print(f"\n\n{'='*30}\n{' '*2}BOOKS BY TIME INTERVAL\n{'='*30}\n")
+    print(f"Time interval: {t} days")
     print(f"Total pages: {sum([book['pages'] for book in books])}")
     print(f"Total pages read: {total_pages_read}")
     print(f"Total pages left: {total_pages_left}")
     print(f"Pages per week: {pages_per_week:.2f}")
     print(f"Pages per day: {pages_per_day:.2f}")
     print(f"Pages per hour: {pages_per_hour:.2f}")
-    print(f"Pages per today: {pages_per_today:.2f}")
-    print("\n\nBooks by time interval:")
+    print(f"Pages per today: {pages_per_today:.2f}\n\n")
+
+    print(f"{'Name':<30} {'Pages read':<15} {'Pages left':<15} {'Pages per week':<20} {'Pages per day':<20}")
+    print("-"*100)
     for book in books:
         pages_read = book.get("pages_read", 0)
         pages_left = book["pages"] - pages_read
         pages_per_week = pages_left / (t/7)
         pages_per_day = pages_left / t
-        print(f"{book['name']} - Pages read: {pages_read} - Pages left: {pages_left} - Pages per week: {pages_per_week:.2f} - Pages per day: {pages_per_day:.2f}")
+        print(f"{book['name']:<30} {pages_read:<15} {pages_left:<15} {pages_per_week:<20.2f} {pages_per_day:<20.2f}")
     input("\n\npress any key to continue......")
     clear_terminal()
+
 
 # Clear the list of books
 def flush_books():

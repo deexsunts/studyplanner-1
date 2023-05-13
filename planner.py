@@ -1,105 +1,141 @@
 import json
-import datetime
 import os
+from datetime import datetime, timedelta
 from clearterminal import clear_terminal
-import gym
-import books
-# Get today's date
-today = datetime.date.today()+datetime.timedelta(0)
-todayex = gym.current()
 
-# Load saved tasks from JSON file if it exists
-saved_data = {}
-if os.path.isfile(f"{today}.json"):
-    with open(f"{today}.json", "r") as file:
-        saved_data = json.load(file)
-        tasks = saved_data.get("tasks", [])
-else:
-    # Initialize the tasks for each day
-    tasks = [
-        {"name": "# Productivity", "done": True},
-        {"name": "today's study date", "done": False},
-        {"name": "today's tasks", "done": False},
-        {"name": "today's books", "done": False},
-        {"name": "today's notes", "done": False},
-        {"name": "today's day plan", "done": False},
-        {"name": "today's videos", "done": False},
-        {"name": "today's reviews", "done": False},
-        {"name": "tomorrow's study planning", "done": False},
-        {"name": "# Personal", "done": True},
-        {"name": "language learning", "done": False},
-        {"name": todayex, "done": False},
-        {"name": "instrument", "done": False}
-    ]
-    # Save the initial tasks to the JSON file
-    with open(f"{today}.json", "w") as file:
-        json.dump({"date": str(today), "tasks": tasks}, file, indent=4)
-    print(f"New tasks file created: {today}.json")
+data = []
 
-    # Save the updated tasks to the JSON file
-    with open(f"{today}.json", "w") as file:
-        json.dump({"date": str(today), "tasks": tasks}, file, indent=4)
-    print(f"Tasks file updated: {today}.json")
-
-# Show all tasks
-def show_all_tasks():
-    counter = 1
-    for task in tasks:
-        if task['name'].startswith('#'):
-            print(f"\t{task['name'].capitalize()}")
-        else:
-            status = "[x]" if task["done"] else "[ ]"
-            print(f"\t{status} {task['name'].capitalize()}")
-            counter += 1
-    print("")
-
-# Tick a task as done
-def tick_task():
+def load_data():
+    global data
     try:
-        index = int(input("Enter the index of the task to tick as done: "))
-        if 0 <= index < len(tasks):
-            tasks[index]["done"] = True
-            print(f"{tasks[index]['name'].capitalize()} is now done!")
-        else:
-            print("Invalid index.")
-    except ValueError:
-        print("Invalid index.")
+        with open('endeavors.json') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = []
+    return data
 
-# Save tasks to JSON file
-def save_tasks():
-    with open(f"{today}.json", "w") as file:
-        json.dump({"date": str(today), "tasks": tasks}, file, indent=4)
-    print("Tasks saved.")
 
-# Show today's tracker
-def show_today_tracker():
-    print("\n\nToday's tracker:\n")
-    show_all_tasks()
+def save_data(data):
+    with open('endeavors.json', 'w') as f:
+        json.dump(data, f, indent=4)
 
-# Menu loop
-def main():
-    print("\n\n\n||planner menu||")
-    while True:
-        choice = input("\n\nEnter s to show today's tracker, t to tick a task as done, q to quit: ")
-        if choice == "s":
+def show_endeavors():
+    clear_terminal()
+    data = load_data()
+    print()
+    tags = set(endeavor['tag'] for endeavor in data)
+    for tag in sorted(tags):
+        print(f"#{tag}")
+        endeavors = sorted(filter(lambda e: e['tag'] == tag, data), key=lambda e: e['index'])
+        for i, endeavor in enumerate(endeavors):
+            done = '[x]' if endeavor['done'] else '[ ]'
+            # modify the formatting of the index and done columns
+            print(f" {str(endeavor['index']).rjust(2)}) {done.ljust(3)} {endeavor['name']}")
+    input("\npress any key to continue...")
+    clear_terminal()
+
+
+def showsmall():
+    clear_terminal()
+    data = load_data()
+    tags = set(endeavor['tag'] for endeavor in data)
+    for tag in sorted(tags):
+        print(f"#{tag}")
+        endeavors = sorted(filter(lambda e: e['tag'] == tag, data), key=lambda e: e['index'])
+        for i, endeavor in enumerate(endeavors):
+            done = '[x]' if endeavor['done'] else '[ ]'
+            print(f"({endeavor['index']}) {done} {endeavor['name']}")
+
+def add_endeavor():
+    clear_terminal()
+    data = load_data()
+    name = input("Name of endeavor: ")
+    tag = input("Tag of endeavor: ")
+    index = len(data)
+    data.append({'index': index, 'name': name, 'tag': tag, 'done': False})
+    save_data(data)
+    print("Endeavor added successfully.")
+    clear_terminal()
+
+def remove_endeavor():
+    clear_terminal()
+    showsmall()
+    data = load_data()
+    index = int(input("\nIndex of endeavor to remove: "))
+    data = [endeavor for endeavor in data if endeavor['index'] != index]
+    for i, endeavor in enumerate(data):
+        endeavor['index'] = i
+    save_data(data)
+    clear_terminal()
+    print("Endeavor removed successfully.\n")
+
+def toggle_done():
+    clear_terminal()
+    showsmall()
+    data = load_data()
+    index = int(input("Index of endeavor to toggle: "))
+    for endeavor in data:
+        if endeavor['index'] == index:
+            endeavor['done'] = not endeavor['done']
+            save_data(data)
             clear_terminal()
-            show_today_tracker()
-        elif choice == "t":
-            tick_task()
-        elif choice == "q":
-            save_tasks()
+            print("Endeavor toggled successfully.\n")
+            return
+    clear_terminal()
+    print("Endeavor not found.\n")
+
+def check_date():
+    data = load_data()
+    if not os.path.isfile("todaysdate2.json"):
+        with open("todaysdate2.json", "w") as f:
+            json.dump(datetime.now().strftime("%d-%m-%Y"), f)
+
+    with open("todaysdate2.json", "r") as f:
+        saved_date = json.load(f)
+    today_date = datetime.now().strftime("%d-%m-%Y")
+    if saved_date != today_date:
+        for endeavor in data:
+            endeavor["done"] = False
+        save_data(data)
+        print("All endeavors have been marked as undone due to a new day.\n")
+    else:
+        pass
+
+def save_today_date():
+    today_date = datetime.now().strftime("%d-%m-%Y")
+    with open("todaysdate2.json", "w") as f:
+        json.dump(today_date, f)
+
+
+def print_menu():
+    print("\n||Transformative Endeavor||\n\nMenu:")
+    print("a. Add endeavor")
+    print("s. Show endeavors")
+    print("r. Remove endeavor")
+    print("m. Toggle endeavor as done")
+    print("q. Quit")
+
+def main():
+    clear_terminal()
+    check_date()
+    save_today_date()
+    while True:
+        print_menu()
+        choice = input("\nEnter choice: ")
+        if choice == 's':
+            show_endeavors()
+        elif choice == 'a':
+            add_endeavor()
+        elif choice == 'r':
+            remove_endeavor()
+        elif choice == 'm':
+            toggle_done()
+        elif choice == 'q':
             clear_terminal()
             break
         else:
-            print("Invalid choice.")
-
-# Save tasks if any are done
-if any(task["done"] for task in tasks):
-    save_tasks()
-
-# Congratulate the user if all tasks are done
-if all(task["done"] for task in tasks):
-    print("Good job! L3333")
+            clear_terminal()
+            print("Invalid choice. Try again.\n")
 
 if __name__ == '__main__':
     main()

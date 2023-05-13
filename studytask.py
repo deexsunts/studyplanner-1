@@ -70,7 +70,7 @@ def list_studies():
         print(f"\n{'Index':<6}{'Name':<39}{'Days':<20}{'Multiplier':<20}{'Done':<10}{'selected':<10}")
         print("----------------------------------------------------------------------------------------------------------")
         for study in studies:
-            print(f"{study['index']:<6}{study['name']:<39}{study['days']:<20}{str(study['multiplier']):<20}{study['done']:<12}{study['selected']:<13}")
+            print(f"{study['index']:<6}{study['name']:<39}{study['days']:<20.2f}{str(study['multiplier']):<20}{study['done']:<12}{study['selected']:<13}")
     input("\npress any key to continue......")
     clear_terminal()
 
@@ -113,15 +113,16 @@ def assign_days_to_studies():
     if num_studies == 0:
         print("No studies added yet.")
     else:
-        total_multiplier = sum([study['multiplier'] for study in studies])
+        total_multiplier = sum([study['multiplier'] for study in studies if study['done'] != 1])
         if total_multiplier == 0:
             print("No multipliers set yet. Please set multipliers before assigning days.")
             return
+        undone_studies = [study for study in studies if study['done'] != 1]
         days_per_study = round(int(task_days) / total_multiplier, 2)
-        for study in studies:
+        for study in undone_studies:
             study_days = days_per_study * study['multiplier']
             study['days'] = round(study_days, 2)
-        print(f"Assigned {days_per_study} days to each study.")
+        print(f"Assigned {days_per_study} days to each study except those already marked as done.")
 
 
 def flush_studies():
@@ -211,12 +212,18 @@ def check_date():
     with open("todaysdate.json", "r") as f:
         saved_date = json.load(f)
     today_date = datetime.now().strftime("%d-%m-%Y")
+
     if saved_date != today_date:
+        saved_date_obj = datetime.strptime(saved_date, "%d-%m-%Y")
+        today_date_obj = datetime.strptime(today_date, "%d-%m-%Y")
+        days_diff = (today_date_obj - saved_date_obj).days
+        with open("todaysdate.json", "w") as f:
+            json.dump(today_date, f)
         for study in studies:
             if study["selected"] == 1:
-                study["days"] -= 1
+                study["days"] -= days_diff
         save_data()
-        print("One day has been removed from the selected Study.")
+        print(f"{days_diff} day(s) have been removed from the selected Study.")
     else:
         #print("Today's date is already saved.")
         pass
@@ -232,7 +239,7 @@ def mark_subject_done():
     try:
         print("\n\nList of studies:")
         for study in studies:
-            print(f"{study['index']}. {study['name']}: {study['desc']}")
+            print(f"{study['index']}. {study['name']}")
         index = int(input("Enter study index to set as done: "))
         clear_terminal()
         subject = next((subject for subject in studies if subject["index"] == index), None)
@@ -259,7 +266,7 @@ def display_study_chart():
     # Display the chart
     print("+" + "-" * 78 + "+")
     print("|{:<78}|".format("{}".format(selected_study['name']).center(77)))
-    print("|{:<78}|".format("{} Days left".format(selected_study['days']).center(77)))
+    print("|{:<78}|".format("{:.2f} Days left".format(selected_study['days']).center(77)))
     print("|{:<78}|".format(datetime.today().strftime("%d-%m-%Y").center(77)))
     print("+" + "-" * 78 + "+")
     print("|{:<78}|".format("Study Description".center(77)))
@@ -309,6 +316,7 @@ def main():
             remove_study()
             reset_study_index()
             save_data()
+            clear_terminal()
         elif choice == "o":
             clear_terminal()
             save_task_days()

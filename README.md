@@ -18,7 +18,10 @@ contains:
  
  
  # CAUTION
- the exercise planner creates a template and you have to edit 
- also the hour of the week (its kinda useless)
- and the today's hours (again, useless and can be commented out)
- they both exist in the daycalculator.py
+ the exercise planner creates a template and you have to edit it.
+ also the hour of the week (useless)
+
+ 
+ #quick changelog
+ changed the planner so it would automatically save stuff down
+ 

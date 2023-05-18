@@ -26,3 +26,11 @@ contains:
  changed the planner so it would automatically save stuff down
  changed the books and the notes section
  added progress to the video section
+ 
+ 
+ 
+ ##changelog 18 may:
+ - added weight tracker
+ - added a calendar (only works for one event per day for now)
+ - fixed minor issues
+ - added active/deactive to notes and books

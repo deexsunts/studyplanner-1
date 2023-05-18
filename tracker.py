@@ -129,10 +129,15 @@ def view_statistics():
     print(f"\n\nTotal time spent studying: {total_time} minutes")
     print(f"Average time spent studying per day: {avg_time:.2f} minutes")
     if subject_time:
-        max_subject = max(subject_time, key=subject_time.get)
-        print(f"Subject studied the most: {max_subject} ({subject_time[max_subject]} minutes)")
+        print("\n\n----------------------")
+        print("Top 5 studied topics:")
+        print("----------------------")
+        sorted_subjects = sorted(subject_time, key=subject_time.get, reverse=True)
+        for i, subject in enumerate(sorted_subjects[:5]):
+            print(f"{i + 1}. {subject}: {subject_time[subject]} minutes")
     input("\n\npress any key to continue...")
     clear_terminal()
+
 
 def ex():
     print()

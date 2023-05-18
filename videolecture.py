@@ -72,11 +72,21 @@ def add_lecture(lectures):
 def show_lectures(lectures):
     clear_terminal()
     print("\n\nIndex\tName\t\tTime left\tDeadline")
+    total_amount = sum(lecture["duration"] for lecture in lectures)
+    total_amount_watched = sum(lecture["amount_watched"] for lecture in lectures)
+    progress_bar_length = 20
+    progress_bar_fill = '█'
+    
     for i, lecture in enumerate(lectures):
         time_left = lecture["duration"] - lecture["amount_watched"]
         time_left_str = f"{time_left//60:02d}:{time_left%60:02d}"  # format the time_left as HH:MM
         deadline = lecture["deadline"].strftime("%d-%m-%Y")
         print(f"{i+1}\t{lecture['name']}\t{time_left_str}\t\t{deadline}")
+    
+    progress_bar_fill_count = int(total_amount_watched / total_amount * progress_bar_length)
+    progress_bar = f"[{progress_bar_fill * progress_bar_fill_count}{' ' * (progress_bar_length - progress_bar_fill_count)}]"
+    print(f"\nProgress: {progress_bar} {int(total_amount_watched / total_amount * 100)}%")
+
 
 def update_index(lectures):
     for i, lecture in enumerate(lectures):

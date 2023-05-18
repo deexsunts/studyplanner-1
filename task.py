@@ -57,6 +57,7 @@ def add_task():
     deadline_str = deadline_date.strftime('%d-%m-%Y')
     tasks.append({"index": task_index, "name": task_name, "deadline": deadline_str, "status": "Haven't studied"})
     print("Task added successfully!")
+    save_data()
     show_tasks()
 
 def remove_task():
@@ -295,7 +296,6 @@ def main():
         if choice == "a":
             clear_terminal()
             add_task()
-            save_data()
             clear_terminal()
         elif choice == "m":
             clear_terminal()

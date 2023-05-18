@@ -24,15 +24,27 @@ def show_endeavors():
     data = load_data()
     print()
     tags = set(endeavor['tag'] for endeavor in data)
+    total_endeavors = sum(1 for endeavor in data if endeavor['done'])  # Count the number of completed endeavors
+    progress_bar_length = 20
+    progress_bar_fill = '█'
+    
     for tag in sorted(tags):
         print(f"#{tag}")
         endeavors = sorted(filter(lambda e: e['tag'] == tag, data), key=lambda e: e['index'])
+        
         for i, endeavor in enumerate(endeavors):
             done = '[x]' if endeavor['done'] else '[ ]'
-            # modify the formatting of the index and done columns
             print(f" {str(endeavor['index']).rjust(2)}) {done.ljust(3)} {endeavor['name']}")
+        
+        tag_endeavors = [endeavor for endeavor in endeavors if endeavor['done']]
+        tag_progress = len(tag_endeavors) / len(endeavors)
+        progress_bar_fill_count = int(tag_progress * progress_bar_length)
+        progress_bar = f"[{progress_bar_fill * progress_bar_fill_count}{' ' * (progress_bar_length - progress_bar_fill_count)}]"
+        print(f"\nProgress: {progress_bar} {int(tag_progress * 100)}%\n")
+    
     input("\npress any key to continue...")
     clear_terminal()
+
 
 
 def showsmall():

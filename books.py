@@ -5,6 +5,15 @@ import daycalculator
 import datetime
 from clearterminal import clear_terminal
 
+def edit_notes():
+    if os.name == 'nt':
+        notes_file = "C:\\Program Files\\Planner\\booknote.txt"
+        editor = 'notepad'
+    else:
+        notes_file = os.path.expanduser("~/plannerconf/booknote.txt")
+        editor = 'vim'
+    os.system(f"{editor} {notes_file}")
+
 # Initialize an empty list to hold the books
 books = []
 
@@ -23,17 +32,6 @@ def save_books():
     with open('books.json', 'w') as f:
         json.dump(books, f)
 
-# Add a new book to the list
-def add_book():
-    name = input("\n\nEnter book name: ")
-    pages = int(input("Enter number of pages: "))
-    book = {"name": name, "pages": pages, "pages_read": 0} # Added pages_read key with initial value 0
-    books.append(book)
-    save_books() # Save the updated list of books to the JSON file
-    clear_terminal()
-    print("Book added successfully.")
-
-
 # Remove a book from the list
 def remove_book():
     print_books()
@@ -41,11 +39,101 @@ def remove_book():
     try:
         del books[index]
         clear_terminal()
-        print("Book removed successfully.")
+        print("book removed successfully.")
     except IndexError:
         print("Invalid index.")
 
-# Modify the number of pages of a book in the list
+# Add a new book to the list
+def add_book():
+    name = input("\n\nEnter book name: ")
+    pages = int(input("Enter number of pages: "))
+    active = input("Active or Deactive? (A/D): ").upper() == "A"  # Added active status
+    book = {"name": name, "pages": pages, "pages_read": 0, "active": active}  # Added active key
+    books.append(book)
+    save_books()  # Save the updated list of books to the JSON file
+    clear_terminal()
+    print("book added successfully.")
+
+def show_on_hold_books():
+    clear_terminal()
+    on_hold_books = [book for book in books if not book.get('active', True)]  # Get on-hold books
+
+    if not on_hold_books:
+        clear_terminal()
+        print("No books are currently on hold.\n")
+        return
+
+    print("\n\nIndex\tName\t\t\t      Pages\t\t Status")
+    for i, book in enumerate(on_hold_books):
+        print(f"{i}\t{book['name'].ljust(30)}{book['pages']}\t\t On Hold")
+
+    index = int(input("\n\nEnter index of book to modify: "))
+    try:
+        book = on_hold_books[index]
+        print("Selected book:", book["name"])
+        print("Current status: On Hold")
+        activate = input("Activate this book? (Y/N): ").upper() == "Y"
+        book["active"] = activate
+        clear_terminal()
+        clear_terminal()
+        print("book status modified successfully.\n")
+    except IndexError:
+        clear_terminal()
+        print("Invalid index.")
+
+
+
+# Display a list of all the books
+def print_books():
+    print("\n\nIndex\tName\t\t\t      Pages\t\t Progress")
+    total_pages = sum(book['pages'] for book in books if book.get('active', True))  # Calculate total pages only for active books
+    total_pages_read = sum(book.get('pages_read', 0) for book in books if book.get('active', True))  # Calculate total pages read only for active books
+    progress_bar_length = 20
+    progress_bar_fill = '█'
+
+    for i, book in enumerate(books):
+        if book.get('active', True):  # Only display active books
+            pages_read = book.get('pages_read', 0)
+            progress = int(pages_read * 100 / total_pages) if total_pages != 0 else 0
+            print(f"{i}\t{book['name'].ljust(30)}{book['pages']}\t\t   {progress}%")
+
+    progress_bar_fill_count = int(total_pages_read / total_pages * progress_bar_length)
+    progress_bar = f"[{progress_bar_fill * progress_bar_fill_count}{' ' * (progress_bar_length - progress_bar_fill_count)}]"
+    print(f"\nProgress: {progress_bar} {int(total_pages_read / total_pages * 100)}%")
+
+# Show books divided into a time interval t
+def show_books_by_time_interval():
+    t = int(daycalculator.days)
+    total_pages_read = sum([book.get("pages_read", 0) for book in books if book.get('active', True)])  # Calculate total pages read only for active books
+    total_pages_left = sum([book["pages"] - book.get("pages_read", 0) for book in books if book.get('active', True)])  # Calculate total pages left only for active books
+    pages_per_week = total_pages_left / (t / 7)
+    pages_per_day = total_pages_left / t
+    pages_per_hour = total_pages_left / (t * int(daycalculator.sum_values) / 7)
+    pages_per_today = pages_per_hour * daycalculator.todayhours
+
+    print(f"\n\n{'='*30}\n{' '*2}bookS BY TIME INTERVAL\n{'='*30}\n")
+    print(f"Time interval: {t} days")
+    print(f"Total pages: {sum([book['pages'] for book in books if book.get('active', True)])}")  # Calculate total pages only for active books
+    print(f"Total pages read: {total_pages_read}")
+    print(f"Total pages left: {total_pages_left}")
+    print(f"Pages per week: {pages_per_week:.2f}")
+    print(f"Pages per day: {pages_per_day:.2f}")
+    print(f"Pages per hour: {pages_per_hour:.2f}")
+    print(f"Pages per today: {pages_per_today:.2f}\n\n")
+
+    print(f"{'Name':<30} {'Pages read':<15} {'Pages left':<15} {'Pages per week':<20} {'Pages per day':<20}")
+    print("-" * 100)
+    for book in books:
+        if book.get('active', True):  # Only display active books
+            pages_read = book.get("pages_read", 0)
+            pages_left = book["pages"] - pages_read
+            pages_per_week = pages_left / (t / 7)
+            pages_per_day = pages_left / t
+            print(
+                f"{book['name']:<30} {pages_read:<15} {pages_left:<15} {pages_per_week:<20.2f} {pages_per_day:<20.2f}")
+    input("\n\nPress any key to continue...")
+    clear_terminal()
+
 def modify_book():
     print_books()
     index = int(input("\n\nEnter index of book to modify: "))
@@ -53,14 +141,19 @@ def modify_book():
         book = books[index]
         print("Selected book:", book["name"])
         print("Current number of pages:", book["pages"])
-        pages = int(input("Enter number of pages to add or remove: "))
-        book["pages"] += pages
+        print("Active status:", "Active" if book.get("active", True) else "Inactive")
+        pages = input("Enter number of pages to add or remove: ")
+        if pages != "":
+            book["pages"] += int(pages)
+        else:
+            pass
+        active = input("Activate or Deactivate? (A/D): ").upper() == "A"
+        book["active"] = active
         clear_terminal()
-        print("Book modified successfully.")
+        print("book modified successfully.")
     except IndexError:
         print("Invalid index.")
-    except ValueError:
-        print("Invalid number of pages.")
+
 
 # Update the number of pages read for a book
 def update_pages_read():
@@ -78,14 +171,6 @@ def update_pages_read():
     else:
         clear_terminal()
         print("Invalid index.")
-
-# Display a list of all the books
-def print_books():
-    print("\n\nIndex\tName\t\t\t      Pages\t\t Progress")
-    for i, book in enumerate(books):
-        pages_read = book.get('pages_read', 0)  # get pages_read value, default to 0 if not present
-        progress = int(pages_read * 100 / book['pages']) if book['pages'] != 0 else 0  # calculate progress percentage
-        print(f"{i}\t{book['name'].ljust(30)}{book['pages']}\t\t   {progress}%")
 
 # Save PDF books from a directory to a JSON file
 def save_pdf_books(directory):
@@ -111,45 +196,6 @@ def save_pdf_books(directory):
     save_books()
     print(f"{len(pdf_files)} PDF books saved successfully.")
 
-def edit_notes():
-    if os.name == 'nt':
-        notes_file = "C:\\Program Files\\Planner\\booknote.txt"
-        editor = 'notepad'
-    else:
-        notes_file = os.path.expanduser("~/plannerconf/booknote.txt")
-        editor = 'vim'
-    os.system(f"{editor} {notes_file}")
-
-# Show books divided into a time interval t
-def show_books_by_time_interval():
-    t = int(daycalculator.days)
-    total_pages_read = sum([book.get("pages_read", 0) for book in books])
-    total_pages_left = sum([book["pages"] - book.get("pages_read", 0) for book in books])
-    pages_per_week = total_pages_left / (t/7)
-    pages_per_day = total_pages_left / t
-    pages_per_hour = total_pages_left / (t*int(daycalculator.sum_values)/7)
-    pages_per_today = pages_per_hour * daycalculator.todayhours
-
-    print(f"\n\n{'='*30}\n{' '*2}BOOKS BY TIME INTERVAL\n{'='*30}\n")
-    print(f"Time interval: {t} days")
-    print(f"Total pages: {sum([book['pages'] for book in books])}")
-    print(f"Total pages read: {total_pages_read}")
-    print(f"Total pages left: {total_pages_left}")
-    print(f"Pages per week: {pages_per_week:.2f}")
-    print(f"Pages per day: {pages_per_day:.2f}")
-    print(f"Pages per hour: {pages_per_hour:.2f}")
-    print(f"Pages per today: {pages_per_today:.2f}\n\n")
-
-    print(f"{'Name':<30} {'Pages read':<15} {'Pages left':<15} {'Pages per week':<20} {'Pages per day':<20}")
-    print("-"*100)
-    for book in books:
-        pages_read = book.get("pages_read", 0)
-        pages_left = book["pages"] - pages_read
-        pages_per_week = pages_left / (t/7)
-        pages_per_day = pages_left / t
-        print(f"{book['name']:<30} {pages_read:<15} {pages_left:<15} {pages_per_week:<20.2f} {pages_per_day:<20.2f}")
-    input("\n\npress any key to continue......")
-    clear_terminal()
 
 
 # Clear the list of books
@@ -158,7 +204,7 @@ def flush_books():
     if confirm.lower() == "y":
         global books
         books = []
-        print("Books flushed successfully. remember to save!")
+        print("books flushed successfully. remember to save!")
         clear_terminal()
         print("\nAll books removed successfully.")
     else:
@@ -174,14 +220,15 @@ def main():
     while True:
         print("\n||currently working books||\n\nMenu:")
         print("a. Add book")
-        print("r. Remove book")
-        print("m. Modify book")
         print("u. Update page")
-        print("s. Show books")
-        print("n. Show notes")
-        print("f. Flush books")
+        print("s. Show books")        
+        print("d. Show time interval")
+        print("n. Edit notes")
+        print("h. Change Status")
         print("v. save books")
-        print("d. show time interval")
+        print("f. Flush books")
+        print("m. Modify book")
+        print("r. Remove book")
         print("y. import books from directory.")
         print("q. Quit")
         choice = input("\nEnter choice: ")
@@ -214,9 +261,12 @@ def main():
         elif choice == "v":
             clear_terminal()
             save_books()
-        elif choice == "n":
-            edit_notes()
+        elif choice == "h":
+            show_on_hold_books()
+            save_books()
+        elif choice == "h":
             clear_terminal()
+            edit_notes()
         elif choice == "y":
             directory = input("Enter directory path: ")
             save_pdf_books(directory)

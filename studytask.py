@@ -67,12 +67,17 @@ def list_studies():
     if len(studies) == 0:
         print("No studies added yet.")
     else:
+        total_days = sum([study['days'] for study in studies])  # Calculate the sum of all days
+        total_multiplier = sum([study['multiplier'] for study in studies])  # Calculate the sum of all days
         print(f"\n{'Index':<6}{'Name':<39}{'Days':<20}{'Multiplier':<20}{'Done':<10}{'selected':<10}")
         print("----------------------------------------------------------------------------------------------------------")
         for study in studies:
             print(f"{study['index']:<6}{study['name']:<39}{study['days']:<20.2f}{str(study['multiplier']):<20}{study['done']:<12}{study['selected']:<13}")
+        print("----------------------------------------------------------------------------------------------------------")
+    print(f"{'':<45}{total_days:<20.2f}{total_multiplier:<20.2f}")
     input("\npress any key to continue......")
     clear_terminal()
+
 
 def save_task_days():
     task_days= input("enter task days: ")

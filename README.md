@@ -28,7 +28,7 @@ contains:
  added progress to the video section
  
  
-##changelog 18 may:
+## changelog 18 may:
  - added weight tracker
  - added a calendar (only works for one event per day for now)
  - fixed minor issues

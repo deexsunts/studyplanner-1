@@ -17,15 +17,9 @@ contains:
  
  
  
- # CAUTION
+ ## CAUTION
  the exercise planner creates a template and you have to edit it.
  also the hour of the week (useless)
-
- 
- #quick changelog
- changed the planner so it would automatically save stuff down
- changed the books and the notes section
- added progress to the video section
  
  
 ## changelog 19 may:
@@ -35,3 +29,4 @@ contains:
  - added active/deactive to notes and books
  - added notebook and goal tracking
  - fixed a problem in the lecture section
+ - study day tracker now track hours 

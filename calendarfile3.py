@@ -49,16 +49,23 @@ def add_event():
                 start = datetime.strptime(event_date, '%d-%m-%Y').strftime('%d-%m-%Y')
                 break
             except ValueError:
+                clear_terminal()
                 print("Invalid date format. Try again.")
 
     calendar_data = load_calendar()
     if start in calendar_data:
-        calendar_data[start].append(name)  # Add the event to the existing date key
+        if len(calendar_data[start]) == 1:
+            clear_terminal()
+            print("Error: This date already has an event.")
+        else:
+            clear_terminal()
+            calendar_data[start].append(name)  # Add the event to the existing date key'
+            print("Event added successfully!")
     else:
         calendar_data[start] = [name]  # Create a new date key and add the event
     save_calendar(calendar_data)
-    clear_terminal()
-    print("Event added successfully!")
+
+
 
 # Function to remove an event
 def remove_event():

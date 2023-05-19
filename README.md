@@ -28,8 +28,10 @@ contains:
  added progress to the video section
  
  
-## changelog 18 may:
+## changelog 19 may:
  - added weight tracker
- - added a calendar (only works for one event per day for now)
+ - added a calendar (support multiple days)
  - fixed minor issues
  - added active/deactive to notes and books
+ - added notebook and goal tracking
+ - fixed a problem in the lecture section

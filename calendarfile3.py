@@ -54,10 +54,6 @@ def add_event():
 
     calendar_data = load_calendar()
     if start in calendar_data:
-        if len(calendar_data[start]) == 1:
-            clear_terminal()
-            print("Error: This date already has an event.")
-        else:
             clear_terminal()
             calendar_data[start].append(name)  # Add the event to the existing date key'
             print("Event added successfully!")
@@ -99,6 +95,7 @@ def remove_event():
     print("Event removed successfully!")
 
 # Function to display the calendar
+# Function to display the calendar
 def display_calendar(start_date):
     clear_terminal()
     calendar_data = load_calendar()
@@ -135,20 +132,24 @@ def display_calendar(start_date):
         print("  +----------+----------+----------+----------+----------+----------+----------+")
 
         for week in week_dates:
-            rows = [""] * 4
+            rows = [""] * 4  # Add an extra row for events
             for date in week:
                 day = datetime.strptime(date, '%d-%m-%Y').strftime('%d')
                 events_on_date = calendar_data.get(date, [])  # Get events for the current date
 
-                event_strings = [f"{event}" for event in events_on_date]
-                events_str = "\n".join(event_strings)
-                
                 date_display = f"{day}{'*' if date == today else ''}"  # Add a star if it's today's date
+
+                if len(events_on_date) > 1:
+                    rows[2] += "|"+"\033[93m  bellow  \033[0m"  # Row for events
+                else: 
+                    event_strings = [f"{event}" for event in events_on_date]
+                    events_str = "".join(event_strings)
+                    rows[2] += "| " + events_str.center(8) + " "  # Row for events
+
                 rows[0] += "| " + date_display.center(8) + " "
                 rows[1] += "+----------"
-                rows[2] += "| " + events_str.center(8) + " "
                 rows[3] += "+----------"
-            
+        
             # Add empty spaces at the start of each row
             rows = ["  " + row for row in rows]
 
@@ -157,6 +158,16 @@ def display_calendar(start_date):
                     print(row + "|")
                 else:
                     print(row + "+")
+
+        # Print the list of events below the calendar
+        print("\n\nEvents:")
+        print("-------")
+        for date, events_on_date in calendar_data.items():
+            if len(events_on_date) > 1:
+                event_string = date + ": " + " - ".join(events_on_date)
+                print(event_string)
+                print()
+
 
         print(f"today's Week of the year: {today_week_number}")
         direction = input("\nEnter direction to change week (l/r) or 'q' to quit: ")
@@ -175,6 +186,7 @@ def display_calendar(start_date):
             clear_terminal()
             print("Invalid direction.")
             break
+
 
 
 def switch_weeks(current_date, weeks_offset):

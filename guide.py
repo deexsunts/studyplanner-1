@@ -16,7 +16,7 @@ from clearterminal import clear_terminal
 import daycalculator
 import weighttracker
 import calendarfile3
-
+import notebook
 
 def main():
     clear_terminal()
@@ -30,11 +30,13 @@ def main():
         print("|{:<39}|{:<39}|".format(" n. notes     - current notes repo", " v. video     - video lecture"))
         print("+{:-^78}+\n".format(""))
         print("|{:<39}|{:<39}|".format(" m. german    - german flashcards", " g. gym       - exercise plan"))
+        print("|{:<39}|{:<39}|".format(" h. notebook  - notebook stuff", ""))
         print("+{:-^78}+\n".format(""))
         print("|{:<39}|{:<39}|".format(" t. track     - study tracker", " u. subjects  - subject list"))
         print("|{:<39}|{:<39}|".format(" w. weight    - weight tracker", " c. calendar  - calendar program" ))
         print("|{:<39}|{:<39}|".format(" q. quit      ", " j. date      - change semester date"))
-        print("{:+^80}\n".format(""))
+        #print("|{:^79}|".format(""))
+        print("|{:+^80}|".format(" "))
         print("{:<50}{:>30}".format(f"{daycalculator.days} days left", f"Today is {daycalculator.weektoday}\n "))
         print("{:<50}{:>30}".format(f"hours in a week is {daycalculator.sum_values}, estimated work is {daycalculator.todayhours} hour and {round(books.pages_per_today)} pages.", f"\ntime left till end of the day: {daycalculator.hours} hours, {daycalculator.minutes} minutes.\n"))
         print("{:<50}{:>30}".format(f"pages per hour is at {'{0:.2f}'.format(books.pages_per_hour)}", ""))
@@ -55,6 +57,9 @@ def main():
         elif select == "d":
             clear_terminal()
             study.main()
+        elif select == "h":
+            clear_terminal()
+            notebook.main()
         elif select == "t":
             clear_terminal()
             tracker.main()

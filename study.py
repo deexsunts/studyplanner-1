@@ -27,30 +27,137 @@ def add_study():
             except ValueError:
                 print("Invalid date format. Try again.")
 
-    amount = int(input("Enter amount of work: "))
+    amount = int(input("Enter amount of work (p): "))
     days = int(input("Enter number of days to finish: "))
-    
+
     number_summable = input("Is the number sum-able? (Y/N): ")
     number = 1 if number_summable.lower() == "y" else 0
 
+    hour_estimate = int(input("Enter the hour estimate for the study: "))
+
     index = len(studies) + 1
-    studies.append({"index": index, "name": name, "amount": amount, "datestart": start, "days": days, "number": number})
+    studies.append({"index": index, "name": name, "amount": amount, "datestart": start, "days": days, "number": number, "hour_estimate": hour_estimate})
+    clear_terminal()
     print("Study added successfully!")
 
-def remove_study():
+def list_studies():
     if len(studies) == 0:
         print("No studies added yet.")
     else:
-        print("\n\nList of studies:")
+        print(f"\n{'Index':<8}{'Name':<20}{'Amount':<10}{'Start Date':<15}{'Days':<10}{'Number':<10}{'Hour Estimate':<15}")
         for study in studies:
-            print(f"{study['index']}. {study['name']}")
-        index = int(input("Enter study index to remove: "))
+            print(f"{study['index']:<8}{study['name']:<20}{study['amount']:<10}{study['datestart']:<15}{study['days']:<10}{study['number']:<10}{study['hour_estimate']:<15}")
+    input("\npress any key to continue......")
+    clear_terminal()
+
+def show_studies():
+    if len(studies) == 0:
+        print("No studies added yet.")
+    else:
+        # Find the maximum date among all the studies
+        max_date = max([datetime.strptime(s["datestart"], '%d-%m-%Y') + timedelta(days=s["days"]) for s in studies])
+
+        # Calculate the number of days between today and the maximum date
+        max_days = (max_date.date() - datetime.today().date()).days
+
+        # Create a list of lists to store the studies for each day
+        study_days = [[] for _ in range(max_days+10)]
+
+        # Create a dictionary to store the sum of study amounts for each day with a study with number=1
+        sum_days = {}
+
+        # Populate the list of study days and the dictionary of sum days
         for study in studies:
-            if study["index"] == index:
-                studies.remove(study)
-                print(f"{study['name']} removed successfully.")
-                return
-        print(f"Study with index {index} not found.")
+            amount_per_day = round(study["amount"] / study["days"], 2)
+            start_day = datetime.strptime(study["datestart"], '%d-%m-%Y').date()
+            for i in range(study["days"]):
+                day = start_day + timedelta(days=i)
+                if start_day <= day < start_day + timedelta(days=study["days"]):
+                    index = (day - datetime.today().date()).days
+                    study_entry = (study["name"], amount_per_day)
+                    study_days[index].append(study_entry)
+                    if study["number"] == 1:
+                        if index in sum_days:
+                            sum_days[index] += amount_per_day
+                        else:
+                            sum_days[index] = amount_per_day
+
+        # Print the study days and the sum of study amounts for days with number=1
+        for i in range(max_days):
+            date = datetime.today().date() + timedelta(days=i)
+            if date > max_date.date():
+                break
+            label = ""
+            if date == datetime.today().date():
+                label = "today"
+            elif date < datetime.today().date():
+                label = "passed"
+            else:
+                label = date.strftime('%d-%m-%Y')
+            print(f"date: {label}")
+            for study in study_days[i]:
+                amount_per_day = study[1]
+                hour_estimate = [s["hour_estimate"] for s in studies if s["name"] == study[0] and s["number"] == 1][0]
+                print(f"{study[0]} ({amount_per_day} per day)")
+            if i in sum_days:
+                if date == datetime.today().date():
+                    print(f"- total workload: ({sum_days[i]} per today's studies)")
+                else:
+                    print(f"- total workload: ({sum_days[i]} per day)")
+                hour_estimate = sum([s["hour_estimate"] / s["days"] for s in studies if s["number"] == 1])
+                print(f"- total hour estimate: {hour_estimate}")
+            print()
+        input("\npress any key to continue......")
+        clear_terminal()
+
+def show_date():
+    if len(studies) == 0:
+        clear_terminal()
+        print("No studies added yet.\n")
+        return
+
+    date = input("Enter date (today/tomorrow/+n/DD-MM-YY): ")
+    try:
+        selected_date = datetime.strptime(date, '%d-%m-%Y').date()
+    except ValueError:
+        if date == 'today':
+            selected_date = datetime.today().date()
+        elif date == 'tomorrow':
+            selected_date = (datetime.today() + timedelta(days=1)).date()
+        elif date.startswith('+'):
+            days = int(date[1:])
+            selected_date = (datetime.today() + timedelta(days=days)).date()
+        else:
+            print("Invalid date format.")
+            input("\npress any key to continue......")
+            clear_terminal()
+            return
+
+    # Create a list to store the studies for the selected date
+    study_date = []
+
+    # Populate the list of study date
+    for study in studies:
+        amount_per_day = round(study["amount"] / study["days"], 2)
+        start_day = datetime.strptime(study["datestart"], '%d-%m-%Y').date()
+        for i in range(study["days"]):
+            day = start_day + timedelta(days=i)
+            if day == selected_date and study["number"] == 1:
+                hour_estimate = study["hour_estimate"] / study["days"]
+                study_date.append((study["name"], amount_per_day, hour_estimate))
+
+    # Print the study date
+    if not study_date:
+        print("No studies for the selected date.")
+        input("\npress any key to continue......")
+    else:
+        clear_terminal()
+        print()
+        print(selected_date.strftime('%d-%m-%Y') + ":")
+        for study in study_date:
+            print(f"{study[0]} ({study[1]} per day - Hour: {study[2]})")
+        input("\npress any key to continue......")
+
 
 def modify_study():
     if len(studies) == 0:
@@ -102,21 +209,35 @@ def modify_study():
                     except ValueError:
                         print("Invalid date format. Try again.")
                         continue
+                    hour_estimate = input("Enter hour estimate (or 'q' to quit): ")
+                    if hour_estimate == 'q':
+                        break
+                    try:
+                        hour_estimate = int(hour_estimate)
+                        study["hour_estimate"] = hour_estimate
+                        print(f"Hour estimate updated to '{study['hour_estimate']}'")
+                    except ValueError:
+                        print("Invalid input. Please enter an integer.")
+                        continue
                 clear_terminal()
                 print("\nStudy modified successfully.\n")
                 return
         print(f"Study with index {index} not found.")
 
 
-def list_studies():
+def remove_study():
     if len(studies) == 0:
         print("No studies added yet.")
     else:
-        print(f"\n{'Index':<8}{'Name':<20}{'Amount':<10}{'Start Date':<15}{'Days':<10}{'Number':<10}")
+        print("\n\nList of studies:")
         for study in studies:
-            print(f"{study['index']:<8}{study['name']:<20}{study['amount']:<10}{study['datestart']:<15}{study['days']:<10}{study['number']:<10}")
-    input("\npress any key to continue......")
-    clear_terminal()
+            print(f"{study['index']}. {study['name']}")
+        index = int(input("Enter study index to remove: "))
+        for study in studies:
+            if study["index"] == index:
+                studies.remove(study)
+                print(f"{study['name']} removed successfully.")
+                return
 
 # def delay_study():
 #     if len(studies) == 0:
@@ -141,118 +262,11 @@ def flush_studies():
         global studies
         studies = []
         clear_terminal()
-        print("\nAll studies removed successfully. remember to save")
+        save_data()
+        print("\nAll studies removed successfully.")
     else:
         clear_terminal()
         print("cancelled.\n")
-
-from datetime import datetime, timedelta
-
-def show_studies():
-    if len(studies) == 0:
-        print("No studies added yet.")
-    else:
-        # Find the maximum date among all the studies
-        max_date = max([datetime.strptime(s["datestart"], '%d-%m-%Y') + timedelta(days=s["days"]) for s in studies])
-
-        # Calculate the number of days between today and the maximum date
-        max_days = (max_date.date() - datetime.today().date()).days
-
-        # Create a list of lists to store the studies for each day
-        study_days = [[] for _ in range(max_days+10)]
-
-        # Create a dictionary to store the sum of study amounts for each day with a study with number=1
-        sum_days = {}
-
-        # Populate the list of study days and the dictionary of sum days
-        for study in studies:
-            amount_per_day = round(study["amount"] / study["days"], 2)
-            start_day = datetime.strptime(study["datestart"], '%d-%m-%Y').date()
-            for i in range(study["days"]):
-                day = start_day + timedelta(days=i)
-                if start_day <= day < start_day + timedelta(days=study["days"]):
-                    index = (day - datetime.today().date()).days
-                    study_entry = (study["name"], amount_per_day)
-                    study_days[index].append(study_entry)
-                    if study["number"] == 1:
-                        if index in sum_days:
-                            sum_days[index] += amount_per_day
-                        else:
-                            sum_days[index] = amount_per_day
-
-        # Print the study days and the sum of study amounts for days with number=1
-        for i in range(max_days):
-            date = datetime.today().date() + timedelta(days=i)
-            if date > max_date.date():
-                break
-            label = ""
-            if date == datetime.today().date():
-                label = "today"
-            elif date < datetime.today().date():
-                label = "passed"
-            else:
-                label = date.strftime('%d-%m-%Y')
-            print(f"date: {label}")
-            for study in study_days[i]:
-                print(f"{study[0]} ({study[1]} per day)")
-            if i in sum_days:
-                if date == datetime.today().date():
-                    print(f"- total workload: ({sum_days[i]} per today's studies)")
-                else:
-                    print(f"- total workload: ({sum_days[i]} per day)")
-            print()
-        input("\npress any key to continue......")
-        clear_terminal()
-
-
-def show_date():
-    if len(studies) == 0:
-        print("No studies added yet.")
-        input("press any key to continue......")
-        return
-
-    date = input("Enter date (today/tomorrow/+n/DD-MM-YY): ")
-    try:
-        selected_date = datetime.strptime(date, '%d-%m-%Y').date()
-    except ValueError:
-        if date == 'today':
-            selected_date = datetime.today().date()
-        elif date == 'tomorrow':
-            selected_date = (datetime.today() + timedelta(days=1)).date()
-        elif date.startswith('+'):
-            days = int(date[1:])
-            selected_date = (datetime.today() + timedelta(days=days)).date()
-        else:
-            print("Invalid date format.")
-            input("\npress any key to continue......")
-            return
-    
-    # Create a list to store the studies for the selected date
-    study_date = []
-
-    # Populate the list of study date
-    for study in studies:
-        amount_per_day = round(study["amount"] / study["days"], 2)
-        start_day = datetime.strptime(study["datestart"], '%d-%m-%Y').date()
-        for i in range(study["days"]):
-            day = start_day + timedelta(days=i)
-            if day == selected_date and study["number"] == 1:
-                study_date.append((study["name"], amount_per_day))
-
-    # Print the study date
-    if not study_date:
-        print("No studies for the selected date.")
-        input("\npress any key to continue......")
-    else:
-        clear_terminal()
-        print()
-        print(selected_date.strftime('%d-%m-%Y') + ":")
-        for study in study_date:
-            print(f"{study[0]} ({study[1]} per day)")
-        input("\npress any key to continue......")
-
-
-
 
 def save_data():
     with open("studies.json", "w") as f:
@@ -276,8 +290,8 @@ def remove_day_from_all_studies():
 load_data()
 
 def main():
+    clear_terminal()
     while True:
-        clear_terminal()
         print("\n||day planner||\n\nMenu:")
         print("a. Add study")
         print("r. Remove study")

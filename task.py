@@ -13,12 +13,20 @@ def load_data():
     except FileNotFoundError:
         print("No saved data found.\n")
 
-
 def update_task_indexes():
     global tasks
     n = len(tasks)
+
+    tasks.sort(key=lambda task: {
+        'Haven\'t studied': 0,
+        'Studying right now': 1,
+        'Study accomplished': 2
+    }[task['status']])
+
     for i in range(n):
         tasks[i]['index'] = i + 1
+
+
 
 def save_data():
     with open("tasks.json", "w") as f:
@@ -83,15 +91,17 @@ def remove_task():
 def move_task():
     clear_terminal()
     update_task_indexes()
-    if len(tasks) == 0:
-        print("No tasks added yet.")
+    pending_tasks = [task for task in tasks if task['status'] != "Study accomplished"]
+
+    if len(pending_tasks) == 0:
+        print("No pending tasks.")
     else:
-        print("List of tasks:")
-        for task in tasks:
-            if task['status'] != "Study accomplished":
-                print(f"{task['index']}. {task['name']} - Status: {task['status']}")
-        task_index = int(input("Enter task index to move: "))
-        for task in tasks:
+        print("List of pending tasks:")
+        for task in pending_tasks:
+            print(f"{task['index']}. {task['name']} - Status: {task['status']}")
+        task_index = int(input("Enter the index of the task to move: "))
+
+        for task in pending_tasks:
             if task["index"] == task_index:
                 current_status = task['status']
                 if current_status == "Haven't studied":
@@ -99,13 +109,16 @@ def move_task():
                 elif current_status == "Studying right now":
                     task['status'] = "Study accomplished"
                 else:
-                    print(f"{task['name']} already accomplished.")
+                    print(f"{task['name']} is already marked as accomplished.")
+                save_data()
+                clear_terminal()
+                show_tasks()
                 return
-        print(f"task with index {task_index} not found.")
+
+        print(f"Task with index {task_index} not found.")
         input("Press any key to continue...")
         clear_terminal()
         show_tasks()
-
 
 def update_task():
     clear_terminal()
@@ -245,7 +258,6 @@ def summarize_tasks():
     for task in studied:
         print(f"- {task['index']}. {task['name']}")
 
-
 def change_due_date():
     clear_terminal()
     if len(tasks) == 0:
@@ -254,8 +266,9 @@ def change_due_date():
 
     print("List of Tasks:")
     for task in tasks:
-        print(f"{task['index']}. {task['name']} - Deadline: {task['deadline']}")
-    
+        if task['status'] != "Study accomplished":
+            print(f"{task['index']}. {task['name']} - Deadline: {task['deadline']}")
+
     task_index = int(input("Enter the index of the task to change the due date: "))
     for task in tasks:
         if task["index"] == task_index:
@@ -274,24 +287,49 @@ def change_due_date():
             return
     print(f"Task with index {task_index} not found.")
 
+def remove_completed_studies():
+    clear_terminal()
+    if len(tasks) == 0:
+        print("No tasks added yet.\n")
+        return
+    
+    removed_count = 0
+    tasks_copy = tasks.copy()  # Create a copy to avoid modifying the list during iteration
+    
+    for task in tasks_copy:
+        if task['status'] == "Study accomplished":
+            tasks.remove(task)
+            removed_count += 1
+    
+    if removed_count > 0:
+        print(f"{removed_count} completed studies removed successfully.\n")
+        update_task_indexes()  # Update the task indexes after removal
+        save_data()
+    else:
+        clear_terminal()
+        print("No completed studies found.\n")
+
 
 def main():
-    clear_terminal()
     load_data()
+    update_task_indexes()
+    save_data()
+    clear_terminal()
     while True:
         print("\n||Study tasks||\n\nMenu:")
         print("\na. Add task")
-        print("m. Move task")
-        print("u. Update task")
-        print("s. Show tasks")
-        print("r. Remove task")
+        print("m.  Move task")
+        print("u.  Update task")
+        print("s.  Show tasks")
+        print("r.  Remove task")
         print("ss. summarize")
-        print("c. Change index")
+        print("c.  Change index")
         print("cc. Change due date")
-        print("v. Save data")
-        print("l. Load data")
-        print("f. flush data")
-        print("q. Quit")
+        print("rr. remove completed tasks")
+        print("v.  Save data")
+        print("l.  Load data")
+        print("f.  flush data")
+        print("q.  Quit")
         choice = input("\nEnter choice: ")
         if choice == "a":
             clear_terminal()
@@ -307,6 +345,9 @@ def main():
             update_task()
             save_data()
             clear_terminal()
+        elif choice == "rr":
+            clear_terminal()
+            remove_completed_studies()
         elif choice == "s":
             clear_terminal()
             show_tasks()

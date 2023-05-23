@@ -7,6 +7,7 @@ from clearterminal import clear_terminal
 studies = []
 
 def add_study():
+    clear_terminal()
     name = input("\n\nEnter study name: ")
     while True:
         study_date = input ("Enter starting date (today/tomorrow/+n/DD-MM-YY): ")
@@ -30,9 +31,9 @@ def add_study():
     amount = int(input("Enter amount of work (p): "))
     days = int(input("Enter number of days to finish: "))
 
-    number_summable = input("Is the number sum-able? (Y/N): ")
-    number = 1 if number_summable.lower() == "y" else 0
-
+    #number_summable = input("Is the number sum-able? (Y/N): ")
+    #number = 1 if number_summable.lower() == "y" else 0
+    number=1
     hour_estimate = int(input("Enter the hour estimate for the study: "))
 
     index = len(studies) + 1
@@ -41,6 +42,7 @@ def add_study():
     print("Study added successfully!")
 
 def list_studies():
+    clear_terminal()
     if len(studies) == 0:
         print("No studies added yet.")
     else:
@@ -51,6 +53,7 @@ def list_studies():
     clear_terminal()
 
 def show_studies():
+    clear_terminal()
     if len(studies) == 0:
         print("No studies added yet.")
     else:
@@ -99,18 +102,17 @@ def show_studies():
                 amount_per_day = study[1]
                 hour_estimate = [s["hour_estimate"] for s in studies if s["name"] == study[0] and s["number"] == 1][0]
                 print(f"{study[0]} ({amount_per_day} per day)")
-            if i in sum_days:
-                if date == datetime.today().date():
-                    print(f"- total workload: ({sum_days[i]} per today's studies)")
-                else:
-                    print(f"- total workload: ({sum_days[i]} per day)")
-                hour_estimate = sum([s["hour_estimate"] / s["days"] for s in studies if s["number"] == 1])
-                print(f"- total hour estimate: {hour_estimate}")
+            print(f"- total workload: {sum_days[i]}")
+            hour_estimate = sum([s["hour_estimate"] / s["days"] for s in studies if s["number"] == 1])
+            print(f"- total hour estimate: {hour_estimate:.2f}")
+            # print("{%.2f}".format(hour_estimate))
+            # print("%.2f" % hour_estimate)
             print()
         input("\npress any key to continue......")
         clear_terminal()
 
 def show_date():
+    clear_terminal()
     if len(studies) == 0:
         clear_terminal()
         print("No studies added yet.\n")
@@ -150,16 +152,18 @@ def show_date():
     if not study_date:
         print("No studies for the selected date.")
         input("\npress any key to continue......")
-    else:
         clear_terminal()
+    else:
         print()
         print(selected_date.strftime('%d-%m-%Y') + ":")
         for study in study_date:
             print(f"{study[0]} ({study[1]} per day - Hour: {study[2]})")
         input("\npress any key to continue......")
+        clear_terminal()
 
 
 def modify_study():
+    clear_terminal()
     if len(studies) == 0:
         print("No studies added yet.")
     else:
@@ -222,13 +226,16 @@ def modify_study():
                 clear_terminal()
                 print("\nStudy modified successfully.\n")
                 return
+        clear_terminal()
         print(f"Study with index {index} not found.")
 
 
 def remove_study():
+    clear_terminal()
     if len(studies) == 0:
         print("No studies added yet.")
     else:
+        clear_terminal()
         print("\n\nList of studies:")
         for study in studies:
             print(f"{study['index']}. {study['name']}")
@@ -236,6 +243,7 @@ def remove_study():
         for study in studies:
             if study["index"] == index:
                 studies.remove(study)
+                clear_terminal()
                 print(f"{study['name']} removed successfully.")
                 return
 
@@ -257,6 +265,7 @@ def remove_study():
 #         print(f"Study with index {index} not found.")
 
 def flush_studies():
+    clear_terminal()
     confirm = input("Are you sure you want to delete all studies? (y/n) ")
     if confirm.lower() == "y":
         global studies
@@ -282,14 +291,22 @@ def load_data():
     except FileNotFoundError:
         print("No saved data found.")
 
-def remove_day_from_all_studies():
-    for study in studies:
-        study["days"] -= 1
-    print("\nOne day has been removed from all studies.\n")
+# def check_start_date():
+#     today = datetime.now().date()
+
+#     for study in studies:
+#         study_start = datetime.strptime(study['datestart'], '%d-%m-%Y').date()
+
+#         if today > study_start:
+#             difference = (today - study_start).days
+#             study['days'] -= difference
+#             study['datestart'] = today.strftime('%d-%m-%Y')
+#     save_data()
 
 load_data()
 
 def main():
+    #check_start_date()
     clear_terminal()
     while True:
         print("\n||day planner||\n\nMenu:")
@@ -300,7 +317,6 @@ def main():
         print("s. Show studies")
         print("d. Show Study by day")
         print("l. list studies")
-        print("o. remove one day")
         print("v. Save data")
         print("b. Load data")
         print("q. Quit")
@@ -335,8 +351,6 @@ def main():
         elif choice == "b":
             clear_terminal()
             load_data()
-        elif choice == "o":
-            remove_day_from_all_studies()
         elif choice == "q":
             clear_terminal()
             break

@@ -64,7 +64,7 @@ def update_flashcard_levels():
 def show_flashcard():
     # Choose a random flashcard from the selected level with lower scores
     min_score = min(flashcards, key=lambda x: x['score'])['score']
-    max_score = min(min_score + 4, max(flashcards, key=lambda x: x['score'])['score'] + 1)
+    max_score = min(min_score + 3, max(flashcards, key=lambda x: x['score'])['score'] + 1)
     candidates = [
         flashcard for flashcard in flashcards
         if min_score <= flashcard['score'] < max_score and flashcard['level'] == selected_level
